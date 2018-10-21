@@ -1,0 +1,8 @@
+*/.vscode
+*.pdf
+*.zip
+
+*/data
+*.class
+
+ANLP-cv01/src/__pycache__
