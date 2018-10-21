@@ -24,9 +24,20 @@ public class Vocabulary {
 
 
     public void put(String word) {
-        if (!wordToKeyMap.containsKey(word)) {
-            wordToKeyMap.put(word, entries.size());
+        this.put(word, true);
+    }
+
+    public void put(String word, boolean increaseOccurrence) {
+        int entryIndex = wordToKeyMap.getOrDefault(word, -1);
+        if (entryIndex == -1) {
+            entryIndex = entries.size();
             entries.add(new Entry(word));
+            wordToKeyMap.put(word, entryIndex);
+        }
+
+        if (increaseOccurrence) {
+            Entry entry = entries.get(entryIndex);
+            entry.occurrence++;
         }
     }
 
@@ -68,11 +79,18 @@ public class Vocabulary {
                 .collect(Collectors.toList());
     }
 
+    public Map<String, Integer> getWeightedVocabulary() {
+        return this.entries.stream()
+                .collect(Collectors.toMap(entry -> entry.word, entry -> entry.occurrence));
+    }
+
     static class Entry {
         private final String word;
+        private int occurrence;
 
         Entry(String word) {
             this.word = word;
+            this.occurrence = 1;
         }
     }
 

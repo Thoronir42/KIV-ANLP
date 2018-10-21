@@ -1,16 +1,13 @@
 package cz.zcu.students.kiwi.anlp.fileIO;
 
-import java.io.IOException;
 
-
-public interface WordSetProvider extends AutoCloseable {
+public interface WordSetProvider {
 
     /**
      * cte vety az do doby co vrati null
      *
-     * @return
-     * @throws IOException
+     * @return Sentence split to words/tokens
      */
-    String[] next() throws IOException;
+    String[] next();
 
 }

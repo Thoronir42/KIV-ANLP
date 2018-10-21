@@ -1,7 +1,7 @@
 package cz.zcu.students.kiwi.anlp.a02;
 
 import cz.zcu.students.kiwi.anlp.IAssignment;
-import cz.zcu.students.kiwi.anlp.fileIO.BasicDataProvider;
+import cz.zcu.students.kiwi.anlp.fileIO.BasicWordSetProvider;
 import cz.zcu.students.kiwi.anlp.model.LanguageModel;
 import cz.zcu.students.kiwi.anlp.model.NGramLanguageModel;
 import cz.zcu.students.kiwi.anlp.model.UniformLanguageModel;
@@ -16,9 +16,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public final class Assignment_02 implements IAssignment {
+public final class Main_02 implements IAssignment {
 
     private static final int MAX_STEPS = 30;
 
@@ -60,12 +62,15 @@ public final class Assignment_02 implements IAssignment {
 
         out.println("=== Testing language model ===");
         LanguageModelEvaluator evaluator = new LanguageModelEvaluator(interpolation, extractor, this.maxNGramOrder);
-        LanguageModelEvaluator.Stats stats = evaluator.evaluate(BasicDataProvider.readAll(this.testFile, StandardCharsets.UTF_8));
+        Collection<String[]> testData = BasicWordSetProvider.stream(this.testFile, StandardCharsets.UTF_8)
+                .collect(Collectors.toList());
+
+        LanguageModelEvaluator.Stats stats = evaluator.evaluate(testData);
         stats.print(out, interpolation.getModelName());
 
         for (LanguageModel model : models) {
             evaluator = new LanguageModelEvaluator(model, extractor, this.maxNGramOrder);
-            stats = evaluator.evaluate(BasicDataProvider.readAll(this.testFile, StandardCharsets.UTF_8));
+            stats = evaluator.evaluate(testData);
             stats.print(out, model.getModelName());
         }
 
@@ -79,7 +84,7 @@ public final class Assignment_02 implements IAssignment {
             nGramModels[i - 1] = new NGramLanguageModel(i, extractor);
         }
 
-        try (BasicDataProvider provider = new BasicDataProvider(trainFile, StandardCharsets.UTF_8)) {
+        try (BasicWordSetProvider provider = new BasicWordSetProvider(trainFile, StandardCharsets.UTF_8)) {
             String[] sentence;
             while ((sentence = provider.next()) != null) {
                 for (int i = 1; i <= maxOrder; i++) {
@@ -100,7 +105,7 @@ public final class Assignment_02 implements IAssignment {
 
     private List<NGram> loadNGrams(String dataFile, NGramExtractor extractor, int order) throws IOException {
         List<NGram> nGrams = new ArrayList<>();
-        BasicDataProvider.readAll(dataFile, StandardCharsets.UTF_8)
+        BasicWordSetProvider.stream(dataFile, StandardCharsets.UTF_8)
                 .forEach((sentence) -> nGrams.addAll(extractor.extract(sentence, order)));
 
         return nGrams;
@@ -108,7 +113,7 @@ public final class Assignment_02 implements IAssignment {
 
     private Vocabulary loadVocabulary(String dataFile) throws IOException {
         Vocabulary vocabulary = new Vocabulary();
-        BasicDataProvider.readAll(dataFile, StandardCharsets.UTF_8)
+        BasicWordSetProvider.stream(dataFile, StandardCharsets.UTF_8)
                 .forEach((sentence) -> {
                     for (String s : sentence) {
                         vocabulary.put(s);
@@ -116,5 +121,16 @@ public final class Assignment_02 implements IAssignment {
                 });
 
         return vocabulary;
+    }
+
+    public static void main(String[] args) {
+        Main_02 main = new Main_02();
+
+        try {
+            main.run(System.out, System.in);
+        } catch (Exception e) {
+            System.err.println("Error occured during runtime of " + main.getClass().getName());
+            e.printStackTrace();
+        }
     }
 }

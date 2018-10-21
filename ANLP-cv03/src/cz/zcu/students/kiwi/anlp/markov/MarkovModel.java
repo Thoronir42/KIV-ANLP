@@ -1,6 +1,6 @@
 package cz.zcu.students.kiwi.anlp.markov;
 
-import cz.zcu.prazak.anlp.a02.LanguageModel;
+import cz.zcu.students.kiwi.anlp.model.LanguageModel;
 
 public abstract class MarkovModel implements IMarkovModel {
 
