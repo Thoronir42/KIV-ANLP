@@ -52,22 +52,27 @@ public final class Assignment_02 implements IAssignment {
         out.println("  loading held-out data from '" + this.heldOutFile + "'");
 
         ExpectationMaximizer adjuster = new ExpectationMaximizer(interpolation);
-        int stepsTaken = adjuster.trainLambdaValues(loadNGrams(this.heldOutFile, extractor, this.maxNGramOrder), 0.01, MAX_STEPS);
+
+        final LanguageModelEvaluator evaluator = new LanguageModelEvaluator(interpolation);
+        List<NGram> testData = loadNGrams(this.testFile, extractor, maxNGramOrder);
+
+        int stepsTaken = adjuster.trainLambdaValues(loadNGrams(this.heldOutFile, extractor, this.maxNGramOrder), 0.01, MAX_STEPS, (step, d) -> {
+            evaluator.evaluate(testData).print(out, String.format("Interpolation step %2d, difference from last step = %s", step, d));
+        });
 
         out.println("  lambdas maximized in " + stepsTaken + " steps");
         out.println("    lambda values = " + interpolation.getLambdasString());
         out.println();
 
         out.println("=== Testing language model ===");
-        LanguageModelEvaluator evaluator = new LanguageModelEvaluator(interpolation);
-        List<NGram> testData = loadNGrams(this.testFile, extractor, maxNGramOrder);
+
 
         LanguageModelEvaluator.Stats stats = evaluator.evaluate(testData);
         stats.print(out, interpolation.getModelName());
 
         for (LanguageModel model : models) {
-            evaluator = new LanguageModelEvaluator(model);
-            stats = evaluator.evaluate(testData);
+            LanguageModelEvaluator partialEvaluator = new LanguageModelEvaluator(model);
+            stats = partialEvaluator.evaluate(testData);
             stats.print(out, model.getModelName());
         }
 

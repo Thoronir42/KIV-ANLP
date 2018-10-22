@@ -12,7 +12,7 @@ public class ExpectationMaximizer {
         this.interpolation = interpolation;
     }
 
-    public int trainLambdaValues(Collection<NGram> trainSentences, double epsilon, int maxSteps) {
+    public int trainLambdaValues(Collection<NGram> trainSentences, double epsilon, int maxSteps, StepCallback stepCallback) {
         double[] newLambdas = new double[interpolation.lambdas.length];
         Arrays.fill(newLambdas, 1.0 / newLambdas.length);
         System.arraycopy(newLambdas, 0, interpolation.lambdas, 0, newLambdas.length);
@@ -33,6 +33,7 @@ public class ExpectationMaximizer {
             dLambdas = compareAbsVectors(interpolation.lambdas, newLambdas);
 
             System.arraycopy(newLambdas, 0, interpolation.lambdas, 0, newLambdas.length);
+            stepCallback.call(step, dLambdas);
         }
 
 
@@ -89,4 +90,9 @@ public class ExpectationMaximizer {
             array[i] /= total;
         }
     }
+
+    public interface StepCallback {
+        void call(int step, double d);
+    }
+
 }
