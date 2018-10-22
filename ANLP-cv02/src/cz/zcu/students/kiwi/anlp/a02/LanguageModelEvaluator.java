@@ -25,17 +25,20 @@ public class LanguageModelEvaluator {
     }
 
     public Stats evaluate(Collection<String[]> testData) {
-        double k = testData.size();
+        double k = 0;
 
         double probSum = 0, log2 = Math.log(2);
         for (String[] sentence : testData) {
             for (NGram nGram : extractor.extract(sentence, maxOrder)) {
                 double prob = this.model.getProbability(nGram);
-                probSum += 1 / k * (Math.log(prob) / log2);
+                probSum += (Math.log(prob) / log2);
+                k++;
             }
         }
 
-        return new Stats(-probSum, Math.pow(2, -probSum));
+        double entropy = - probSum / k;
+
+        return new Stats(entropy, Math.pow(2, entropy));
     }
 
     // originally in Test.java
