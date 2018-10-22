@@ -59,13 +59,15 @@ public final class Assignment_02 implements IAssignment {
         out.println();
 
         out.println("=== Testing language model ===");
-        LanguageModelEvaluator evaluator = new LanguageModelEvaluator(interpolation, extractor, this.maxNGramOrder);
-        LanguageModelEvaluator.Stats stats = evaluator.evaluate(BasicDataProvider.readAll(this.testFile, StandardCharsets.UTF_8));
+        LanguageModelEvaluator evaluator = new LanguageModelEvaluator(interpolation);
+        List<NGram> testData = loadNGrams(this.testFile, extractor, maxNGramOrder);
+
+        LanguageModelEvaluator.Stats stats = evaluator.evaluate(testData);
         stats.print(out, interpolation.getModelName());
 
         for (LanguageModel model : models) {
-            evaluator = new LanguageModelEvaluator(model, extractor, this.maxNGramOrder);
-            stats = evaluator.evaluate(BasicDataProvider.readAll(this.testFile, StandardCharsets.UTF_8));
+            evaluator = new LanguageModelEvaluator(model);
+            stats = evaluator.evaluate(testData);
             stats.print(out, model.getModelName());
         }
 

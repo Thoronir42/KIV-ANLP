@@ -15,25 +15,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LanguageModelEvaluator {
 
     private final LanguageModel model;
-    private final NGramExtractor extractor;
-    private final int maxOrder;
 
-    public LanguageModelEvaluator(LanguageModel model, NGramExtractor extractor, int maxOrder) {
+    public LanguageModelEvaluator(LanguageModel model) {
         this.model = model;
-        this.extractor = extractor;
-        this.maxOrder = maxOrder;
     }
 
-    public Stats evaluate(Collection<String[]> testData) {
+    public Stats evaluate(Collection<NGram> testData) {
         double k = 0;
 
         double probSum = 0, log2 = Math.log(2);
-        for (String[] sentence : testData) {
-            for (NGram nGram : extractor.extract(sentence, maxOrder)) {
-                double prob = this.model.getProbability(nGram);
-                probSum += (Math.log(prob) / log2);
-                k++;
-            }
+
+        for (NGram nGram : testData) {
+            double prob = this.model.getProbability(nGram);
+            probSum += (Math.log(prob) / log2);
+            k++;
         }
 
         double entropy = - probSum / k;
